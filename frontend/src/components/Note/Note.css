@@ -1,0 +1,88 @@
+.note {
+  width: 100%;
+  height: auto;
+  padding: 20px;
+  margin: 10px;
+  position: relative;
+  font-size: 14px;
+  line-height: 1.4;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.note--yellow {
+  background: linear-gradient(135deg, #fff740 0%, #ffed4e 100%);
+}
+
+.note--pink {
+  background: linear-gradient(135deg, #ff9a9e 0%, #ff9a9e 100%);
+}
+
+.note--blue {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+}
+
+.note--green {
+  background: linear-gradient(135deg, #d9ed92 0%, #b5e48c 100%);
+}
+
+.note__checkbox {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #333;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 0;
+  font-family: inherit;
+}
+
+.note__checkbox:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: scale(1.1);
+}
+
+.checkmark {
+  color: #28a745;
+  font-size: 14px;
+}
+
+.note--checked {
+  opacity: 0.7;
+  transform: scale(0.95);
+}
+
+.note--checked .note__content {
+  text-decoration: line-through;
+  color: #666;
+}
+
+.note--checked .note__checkbox {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.note--checked .checkmark {
+  color: white;
+}
+
+.note__content {
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
+  color: #333;
+  white-space: pre-wrap;
+  padding-right: 30px;
+}
