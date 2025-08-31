@@ -1,12 +1,14 @@
 import { useState } from "react";
 import "./App.css";
 import Note from "./components/Note/Note";
+import DragDropBoard from "./components/DragDropBoard/DragDropBoard";
+import { NoteStatus } from "./types";
 
 interface ProjectNote {
   id: string;
   content: string;
   color: "yellow" | "pink" | "blue" | "green";
-  checked: boolean;
+  status: NoteStatus;
 }
 
 interface Project {
@@ -25,19 +27,19 @@ function App() {
           id: "1",
           content: "Research competitor analysis",
           color: "yellow",
-          checked: false,
+          status: NoteStatus.BACKLOG,
         },
         {
           id: "2",
           content: "Meeting with client at 2pm",
           color: "pink",
-          checked: true,
+          status: NoteStatus.DONE,
         },
         {
           id: "3",
           content: "Review design mockups",
           color: "blue",
-          checked: false,
+          status: NoteStatus.DOING,
         },
       ],
     },
@@ -49,13 +51,13 @@ function App() {
           id: "4",
           content: "Fix authentication bug",
           color: "pink",
-          checked: false,
+          status: NoteStatus.DOING,
         },
         {
           id: "5",
           content: "Deploy to staging",
           color: "green",
-          checked: true,
+          status: NoteStatus.DONE,
         },
       ],
     },
@@ -67,25 +69,25 @@ function App() {
           id: "6",
           content: "Update documentation",
           color: "blue",
-          checked: false,
+          status: NoteStatus.BACKLOG,
         },
         {
           id: "7",
           content: "Code review session",
           color: "yellow",
-          checked: false,
+          status: NoteStatus.BACKLOG,
         },
         {
           id: "8",
           content: "Performance optimization",
           color: "green",
-          checked: true,
+          status: NoteStatus.DONE,
         },
         {
           id: "9",
           content: "Test new features",
           color: "pink",
-          checked: false,
+          status: NoteStatus.DOING,
         },
       ],
     },
@@ -97,7 +99,7 @@ function App() {
           id: "10",
           content: "Plan sprint goals",
           color: "yellow",
-          checked: false,
+          status: NoteStatus.BACKLOG,
         },
       ],
     },
@@ -112,19 +114,12 @@ function App() {
   const [newNoteColor, setNewNoteColor] = useState<
     "yellow" | "pink" | "blue" | "green"
   >("yellow");
+  const [newNoteStatus, setNewNoteStatus] = useState<NoteStatus>(
+    NoteStatus.BACKLOG
+  );
+  const [viewMode, setViewMode] = useState<"list" | "board">("board");
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
-
-  const toggleNoteChecked = (noteId: string) => {
-    setProjects((prevProjects) =>
-      prevProjects.map((project) => ({
-        ...project,
-        notes: project.notes.map((note) =>
-          note.id === noteId ? { ...note, checked: !note.checked } : note
-        ),
-      }))
-    );
-  };
 
   const addProject = () => {
     if (newProjectName.trim()) {
@@ -174,6 +169,17 @@ function App() {
     );
   };
 
+  const updateNoteStatus = (noteId: string, newStatus: NoteStatus) => {
+    setProjects((prevProjects) =>
+      prevProjects.map((project) => ({
+        ...project,
+        notes: project.notes.map((note) =>
+          note.id === noteId ? { ...note, status: newStatus } : note
+        ),
+      }))
+    );
+  };
+
   const deleteNote = async (noteId: string) => {
     if (deletingNoteId === noteId) return;
 
@@ -214,7 +220,7 @@ function App() {
       id: Date.now().toString(),
       content: newNoteContent.trim(),
       color: newNoteColor,
-      checked: false,
+      status: newNoteStatus,
     };
 
     setProjects((prevProjects) =>
@@ -227,6 +233,7 @@ function App() {
 
     setNewNoteContent("");
     setNewNoteColor("yellow");
+    setNewNoteStatus(NoteStatus.BACKLOG);
     setIsAddingNote(false);
   };
 
@@ -238,6 +245,7 @@ function App() {
       setIsAddingNote(false);
       setNewNoteContent("");
       setNewNoteColor("yellow");
+      setNewNoteStatus(NoteStatus.BACKLOG);
     }
   };
 
@@ -245,6 +253,7 @@ function App() {
     <div className="background">
       <div className="page-container">
         <h1 className="primary">Projects & Notes</h1>
+        <div style={{ height: "16px" }} />
         <main className="flex">
           <div className="projects-sidebar">
             <div className="projects-header">
@@ -319,7 +328,29 @@ function App() {
           </div>
           <div className="notes-section">
             <div className="notes-header">
-              <h2 className="primary-text">Notes</h2>
+              <div className="notes-header-left">
+                <h2 className="primary-text">Notes</h2>
+                <div className="view-toggle">
+                  <button
+                    className={`view-btn ${
+                      viewMode === "list" ? "active" : ""
+                    }`}
+                    onClick={() => setViewMode("list")}
+                    aria-label="List view"
+                  >
+                    List
+                  </button>
+                  <button
+                    className={`view-btn ${
+                      viewMode === "board" ? "active" : ""
+                    }`}
+                    onClick={() => setViewMode("board")}
+                    aria-label="Board view"
+                  >
+                    Board
+                  </button>
+                </div>
+              </div>
               {selectedProject && (
                 <button
                   className="add-note-btn"
@@ -330,78 +361,111 @@ function App() {
                 </button>
               )}
             </div>
-            <div className="notes-container flex">
-              {selectedProject?.notes.map((note) => (
-                <Note
-                  key={note.id}
-                  content={note.content}
-                  color={note.color}
-                  checked={note.checked}
-                  onToggle={() => toggleNoteChecked(note.id)}
-                  onEdit={(newContent) => editNote(note.id, newContent)}
-                  onDelete={() => deleteNote(note.id)}
-                  isDeleting={deletingNoteId === note.id}
-                />
-              ))}
-              {isAddingNote && (
-                <div className={`note note--${newNoteColor} note--adding`}>
-                  <div className="add-note-form">
-                    <textarea
-                      value={newNoteContent}
-                      onChange={(e) => setNewNoteContent(e.target.value)}
-                      onKeyDown={handleAddNoteKeyPress}
-                      className="add-note-input"
-                      placeholder="Enter note content..."
-                      autoFocus
-                      rows={4}
-                    />
-                    <div className="add-note-controls">
-                      <div className="color-picker">
-                        {(["yellow", "pink", "blue", "green"] as const).map(
-                          (color) => (
-                            <button
-                              key={color}
-                              className={`color-option color-option--${color} ${
-                                newNoteColor === color ? "active" : ""
-                              }`}
-                              onClick={() => setNewNoteColor(color)}
-                              aria-label={`Select ${color} color`}
-                              type="button"
-                            />
-                          )
-                        )}
-                      </div>
-                      <div className="form-actions">
-                        <button
-                          onClick={addNote}
-                          className="save-note-btn"
-                          disabled={!newNoteContent.trim()}
-                          type="button"
-                        >
-                          ✓
-                        </button>
-                        <button
-                          onClick={() => {
-                            setIsAddingNote(false);
-                            setNewNoteContent("");
-                            setNewNoteColor("yellow");
-                          }}
-                          className="cancel-note-btn"
-                          type="button"
-                        >
-                          ✕
-                        </button>
+            {viewMode === "board" && selectedProject ? (
+              <DragDropBoard
+                notes={selectedProject.notes}
+                onEdit={editNote}
+                onDelete={deleteNote}
+                onStatusChange={updateNoteStatus}
+                deletingNoteId={deletingNoteId}
+              />
+            ) : (
+              <div className="notes-container flex">
+                {selectedProject?.notes.map((note) => (
+                  <Note
+                    key={note.id}
+                    id={note.id}
+                    content={note.content}
+                    color={note.color}
+                    status={note.status}
+                    onEdit={(newContent) => editNote(note.id, newContent)}
+                    onDelete={() => deleteNote(note.id)}
+                    onStatusChange={(newStatus) =>
+                      updateNoteStatus(note.id, newStatus)
+                    }
+                    isDeleting={deletingNoteId === note.id}
+                  />
+                ))}
+                {isAddingNote && (
+                  <div className={`note note--${newNoteColor} note--adding`}>
+                    <div className="add-note-form">
+                      <textarea
+                        value={newNoteContent}
+                        onChange={(e) => setNewNoteContent(e.target.value)}
+                        onKeyDown={handleAddNoteKeyPress}
+                        className="add-note-input"
+                        placeholder="Enter note content..."
+                        autoFocus
+                        rows={4}
+                      />
+                      <div className="add-note-controls">
+                        <div className="note-options">
+                          <div className="color-picker">
+                            <label className="option-label">Color:</label>
+                            {(["yellow", "pink", "blue", "green"] as const).map(
+                              (color) => (
+                                <button
+                                  key={color}
+                                  className={`color-option color-option--${color} ${
+                                    newNoteColor === color ? "active" : ""
+                                  }`}
+                                  onClick={() => setNewNoteColor(color)}
+                                  aria-label={`Select ${color} color`}
+                                  type="button"
+                                />
+                              )
+                            )}
+                          </div>
+                          <div className="status-picker">
+                            <label className="option-label">Status:</label>
+                            <select
+                              value={newNoteStatus}
+                              onChange={(e) =>
+                                setNewNoteStatus(e.target.value as NoteStatus)
+                              }
+                              className="status-select"
+                            >
+                              <option value={NoteStatus.BACKLOG}>
+                                Backlog
+                              </option>
+                              <option value={NoteStatus.DOING}>Doing</option>
+                              <option value={NoteStatus.DONE}>Done</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="form-actions">
+                          <button
+                            onClick={addNote}
+                            className="save-note-btn"
+                            disabled={!newNoteContent.trim()}
+                            type="button"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsAddingNote(false);
+                              setNewNoteContent("");
+                              setNewNoteColor("yellow");
+                              setNewNoteStatus(NoteStatus.BACKLOG);
+                            }}
+                            className="cancel-note-btn"
+                            type="button"
+                          >
+                            ✕
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-              {!selectedProject?.notes.length && !isAddingNote && (
-                <div className="empty-state">
-                  <p>No notes in this project yet.</p>
-                </div>
-              )}
-            </div>
+                )}
+                {!selectedProject?.notes.length && !isAddingNote && (
+                  <div className="empty-state">
+                    <p>No notes in this project yet.</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </main>
       </div>

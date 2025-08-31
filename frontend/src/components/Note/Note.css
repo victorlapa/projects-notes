@@ -27,54 +27,46 @@
   background: linear-gradient(135deg, #d9ed92 0%, #b5e48c 100%);
 }
 
-.note__checkbox {
+.note__status {
   position: absolute;
   top: 8px;
-  right: 8px;
-  width: 20px;
-  height: 20px;
-  border: 2px solid #333;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  left: 8px;
+  z-index: 2;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 12px;
-  font-weight: bold;
-  padding: 0;
-  font-family: inherit;
 }
 
-.note__checkbox:hover {
-  background-color: rgba(255, 255, 255, 0.9);
-  transform: scale(1.1);
-}
-
-.checkmark {
-  color: #28a745;
-  font-size: 14px;
-}
-
-.note--checked {
-  opacity: 0.7;
-  transform: scale(0.95);
-}
-
-.note--checked .note__content {
-  text-decoration: line-through;
-  color: #666;
-}
-
-.note--checked .note__checkbox {
-  background-color: #28a745;
-  border-color: #28a745;
-}
-
-.note--checked .checkmark {
+.status-badge--backlog {
+  background-color: #6c757d;
   color: white;
 }
+
+.status-badge--doing {
+  background-color: #007bff;
+  color: white;
+}
+
+.status-badge--done {
+  background-color: #28a745;
+  color: white;
+}
+
+.status-badge:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+
 
 .note__actions {
   position: absolute;
@@ -129,6 +121,23 @@
 .note--deleting {
   opacity: 0.5;
   pointer-events: none;
+}
+
+.note--dragging {
+  opacity: 0.5;
+  transform: rotate(2deg);
+  cursor: grabbing;
+  z-index: 1000;
+}
+
+.note[draggable="true"] {
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.note[draggable="true"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .note--editing {
@@ -217,6 +226,7 @@
   white-space: pre-wrap;
   padding-right: 30px;
   padding-left: 8px;
+  padding-top: 35px;
   padding-bottom: 12px;
   cursor: text;
 }

@@ -225,6 +225,44 @@
   text-align: left;
 }
 
+.notes-header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.view-toggle {
+  display: flex;
+  border: 1px solid rgba(0, 123, 255, 0.3);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.view-btn {
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #007bff;
+  position: relative;
+}
+
+.view-btn:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+.view-btn.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.view-btn:not(:last-child) {
+  border-right: 1px solid rgba(0, 123, 255, 0.3);
+}
+
 .add-note-btn {
   width: 30px;
   height: 30px;
@@ -294,7 +332,7 @@
 .add-note-controls {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   gap: 12px;
 
   .form-actions {
@@ -303,9 +341,46 @@
   }
 }
 
+.note-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .color-picker {
   display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+.status-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.option-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-select {
+  padding: 4px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  font-size: 12px;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: #28a745;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1);
 }
 
 .color-option {

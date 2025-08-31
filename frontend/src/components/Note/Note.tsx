@@ -1,14 +1,17 @@
 import "./Note.css";
+import { NoteStatus } from "../../types";
 
 interface NoteProps {
   content?: string;
   color?: "yellow" | "pink" | "blue" | "green";
   className?: string;
-  checked?: boolean;
-  onToggle?: () => void;
   onEdit?: (newContent: string) => void;
   onDelete?: () => void;
   isDeleting?: boolean;
+  status?: NoteStatus;
+  onStatusChange?: (newStatus: NoteStatus) => void;
+  id?: string;
+  isDragging?: boolean;
 }
 
 import { useState } from "react";
@@ -17,11 +20,13 @@ export default function Note({
   content = "",
   color = "yellow",
   className = "",
-  checked = false,
-  onToggle,
   onEdit,
   onDelete,
   isDeleting = false,
+  status = NoteStatus.BACKLOG,
+  onStatusChange,
+  id,
+  isDragging = false,
 }: Readonly<NoteProps>) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(content);
@@ -47,16 +52,49 @@ export default function Note({
     }
   };
 
+  const getStatusDisplayName = (status: NoteStatus) => {
+    switch (status) {
+      case NoteStatus.BACKLOG:
+        return "Backlog";
+      case NoteStatus.DOING:
+        return "Doing";
+      case NoteStatus.DONE:
+        return "Done";
+      default:
+        return "Backlog";
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    if (id) {
+      e.dataTransfer.setData("text/plain", id);
+      e.dataTransfer.effectAllowed = "move";
+    }
+  };
+
   return (
-    <div className={`note note--${color} ${checked ? "note--checked" : ""} ${isEditing ? "note--editing" : ""} ${isDeleting ? "note--deleting" : ""} ${className}`}>
-      <button 
-        className="note__checkbox" 
-        onClick={onToggle}
-        aria-label={checked ? "Mark as incomplete" : "Mark as complete"}
-        type="button"
-      >
-        {checked && <span className="checkmark">✓</span>}
-      </button>
+    <div 
+      className={`note note--${color} ${isEditing ? "note--editing" : ""} ${isDeleting ? "note--deleting" : ""} ${isDragging ? "note--dragging" : ""} note--status-${status.toLowerCase()} ${className}`}
+      draggable={!isEditing && !isDeleting}
+      onDragStart={handleDragStart}
+    >
+      <div className="note__status">
+        {onStatusChange ? (
+          <select
+            value={status}
+            onChange={(e) => onStatusChange(e.target.value as NoteStatus)}
+            className={`status-badge status-badge--${status.toLowerCase()}`}
+          >
+            <option value={NoteStatus.BACKLOG}>Backlog</option>
+            <option value={NoteStatus.DOING}>Doing</option>
+            <option value={NoteStatus.DONE}>Done</option>
+          </select>
+        ) : (
+          <span className={`status-badge status-badge--${status.toLowerCase()}`}>
+            {getStatusDisplayName(status)}
+          </span>
+        )}
+      </div>
       
       {!isEditing && (
         <div className="note__actions">
