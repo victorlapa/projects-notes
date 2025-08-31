@@ -359,6 +359,12 @@
   gap: 8px;
 }
 
+.user-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .option-label {
   font-size: 12px;
   font-weight: 600;
@@ -381,6 +387,23 @@
   outline: none;
   border-color: #28a745;
   box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1);
+}
+
+.user-select {
+  padding: 4px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  font-size: 12px;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  min-width: 120px;
+}
+
+.user-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
 }
 
 .color-option {

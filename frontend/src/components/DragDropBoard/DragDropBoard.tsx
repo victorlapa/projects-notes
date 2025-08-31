@@ -10,13 +10,19 @@ interface ProjectNote {
   status: NoteStatus;
 }
 
+interface User {
+  id: string;
+  name: string;
+}
+
 interface DragDropBoardProps {
   notes: ProjectNote[];
   onEdit: (noteId: string, newContent: string) => void;
   onDelete: (noteId: string) => void;
   onStatusChange: (noteId: string, newStatus: NoteStatus) => void;
-  onAddNote: (content: string, color: "yellow" | "pink" | "blue" | "green", status: NoteStatus) => void;
+  onAddNote: (content: string, color: "yellow" | "pink" | "blue" | "green", status: NoteStatus, userId?: string) => void;
   deletingNoteId: string | null;
+  users: User[];
 }
 
 export default function DragDropBoard({
@@ -26,12 +32,14 @@ export default function DragDropBoard({
   onStatusChange,
   onAddNote,
   deletingNoteId,
+  users,
 }: DragDropBoardProps) {
   const [dragOverColumn, setDragOverColumn] = useState<NoteStatus | null>(null);
   const [draggingNoteId, setDraggingNoteId] = useState<string | null>(null);
   const [addingToColumn, setAddingToColumn] = useState<NoteStatus | null>(null);
   const [newNoteContent, setNewNoteContent] = useState("");
   const [newNoteColor, setNewNoteColor] = useState<"yellow" | "pink" | "blue" | "green">("yellow");
+  const [newNoteUserId, setNewNoteUserId] = useState<string>("");
 
   const handleDragOver = (e: React.DragEvent, status: NoteStatus) => {
     e.preventDefault();
@@ -85,14 +93,16 @@ export default function DragDropBoard({
     setAddingToColumn(status);
     setNewNoteContent("");
     setNewNoteColor("yellow");
+    setNewNoteUserId("");
   };
 
   const handleSaveNewNote = () => {
     if (newNoteContent.trim() && addingToColumn) {
-      onAddNote(newNoteContent.trim(), newNoteColor, addingToColumn);
+      onAddNote(newNoteContent.trim(), newNoteColor, addingToColumn, newNoteUserId || undefined);
       setAddingToColumn(null);
       setNewNoteContent("");
       setNewNoteColor("yellow");
+      setNewNoteUserId("");
     }
   };
 
@@ -100,6 +110,7 @@ export default function DragDropBoard({
     setAddingToColumn(null);
     setNewNoteContent("");
     setNewNoteColor("yellow");
+    setNewNoteUserId("");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -194,6 +205,21 @@ export default function DragDropBoard({
                           />
                         )
                       )}
+                    </div>
+                    <div className="user-picker-board">
+                      <select
+                        value={newNoteUserId}
+                        onChange={(e) => setNewNoteUserId(e.target.value)}
+                        className="user-select-board"
+                        aria-label="Assign to user"
+                      >
+                        <option value="">No assignee</option>
+                        {users.map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {user.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div className="form-actions-board">
                       <button

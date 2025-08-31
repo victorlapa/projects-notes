@@ -189,6 +189,29 @@
   border-color: rgba(0, 0, 0, 0.3);
 }
 
+.user-picker-board {
+  display: flex;
+  align-items: center;
+}
+
+.user-select-board {
+  padding: 2px 4px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  font-size: 10px;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  min-width: 80px;
+  font-family: inherit;
+}
+
+.user-select-board:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.1);
+}
+
 .form-actions-board {
   display: flex;
   gap: 4px;
@@ -232,7 +255,6 @@
   background-color: #c82333;
 }
 
-/* Note modifications for drag and drop */
 .note--dragging {
   opacity: 0.5;
   transform: rotate(2deg);

@@ -1,111 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import Note from "./components/Note/Note";
 import DragDropBoard from "./components/DragDropBoard/DragDropBoard";
 import { NoteStatus } from "./types";
-
-interface ProjectNote {
-  id: string;
-  content: string;
-  color: "yellow" | "pink" | "blue" | "green";
-  status: NoteStatus;
-}
-
-interface Project {
-  id: string;
-  name: string;
-  notes: ProjectNote[];
-}
+import type { Project, ProjectNote } from "./types";
+import { ProjectsService, NotesService, UsersService, ApiError } from "./services";
+import type { User } from "./services";
 
 function App() {
-  const [projects, setProjects] = useState<Project[]>([
-    {
-      id: "1",
-      name: "Projeto 1",
-      notes: [
-        {
-          id: "1",
-          content: "Research competitor analysis",
-          color: "yellow",
-          status: NoteStatus.BACKLOG,
-        },
-        {
-          id: "2",
-          content: "Meeting with client at 2pm",
-          color: "pink",
-          status: NoteStatus.DONE,
-        },
-        {
-          id: "3",
-          content: "Review design mockups",
-          color: "blue",
-          status: NoteStatus.DOING,
-        },
-      ],
-    },
-    {
-      id: "2",
-      name: "Projeto 2",
-      notes: [
-        {
-          id: "4",
-          content: "Fix authentication bug",
-          color: "pink",
-          status: NoteStatus.DOING,
-        },
-        {
-          id: "5",
-          content: "Deploy to staging",
-          color: "green",
-          status: NoteStatus.DONE,
-        },
-      ],
-    },
-    {
-      id: "3",
-      name: "Projeto 3",
-      notes: [
-        {
-          id: "6",
-          content: "Update documentation",
-          color: "blue",
-          status: NoteStatus.BACKLOG,
-        },
-        {
-          id: "7",
-          content: "Code review session",
-          color: "yellow",
-          status: NoteStatus.BACKLOG,
-        },
-        {
-          id: "8",
-          content: "Performance optimization",
-          color: "green",
-          status: NoteStatus.DONE,
-        },
-        {
-          id: "9",
-          content: "Test new features",
-          color: "pink",
-          status: NoteStatus.DOING,
-        },
-      ],
-    },
-    {
-      id: "4",
-      name: "Projeto 4",
-      notes: [
-        {
-          id: "10",
-          content: "Plan sprint goals",
-          color: "yellow",
-          status: NoteStatus.BACKLOG,
-        },
-      ],
-    },
-  ]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [projectNotes, setProjectNotes] = useState<Record<string, ProjectNote[]>>({});
+  const [users, setUsers] = useState<User[]>([]);
 
-  const [selectedProjectId, setSelectedProjectId] = useState<string>("1");
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [newProjectName, setNewProjectName] = useState<string>("");
   const [isAddingProject, setIsAddingProject] = useState<boolean>(false);
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
@@ -114,24 +21,100 @@ function App() {
   const [newNoteColor, setNewNoteColor] = useState<
     "yellow" | "pink" | "blue" | "green"
   >("yellow");
-  const [newNoteStatus, setNewNoteStatus] = useState<NoteStatus>(
-    NoteStatus.BACKLOG
-  );
+  const [newNoteUserId, setNewNoteUserId] = useState<string>("");
   const [viewMode, setViewMode] = useState<"list" | "board">("board");
 
-  const selectedProject = projects.find((p) => p.id === selectedProjectId);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isProjectLoading, setIsProjectLoading] = useState(false);
+  const [isNoteLoading, setIsNoteLoading] = useState(false);
 
-  const addProject = () => {
-    if (newProjectName.trim()) {
-      const newProject: Project = {
-        id: Date.now().toString(),
+  const selectedProject = projects.find((p) => p.id === selectedProjectId);
+  const selectedProjectNotes = selectedProjectId ? projectNotes[selectedProjectId] || [] : [];
+
+  useEffect(() => {
+    fetchProjects();
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    if (selectedProjectId && !selectedProjectId.startsWith('temp-')) {
+      fetchProjectNotes(selectedProjectId);
+    }
+  }, [selectedProjectId]);
+  const fetchProjects = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await ProjectsService.getProjects();
+      setProjects(response.data);
+      if (response.data.length > 0 && !selectedProjectId) {
+        setSelectedProjectId(response.data[0].id);
+      }
+    } catch (err) {
+      console.error('Failed to fetch projects:', err);
+      setError(err instanceof ApiError ? err.message : 'Failed to load projects');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchProjectNotes = async (projectId: string) => {
+    try {
+      const notes = await NotesService.getNotesByProject(projectId);
+      setProjectNotes(prev => ({ ...prev, [projectId]: notes }));
+    } catch (err) {
+      console.error('Failed to fetch notes for project:', projectId, err);
+      setError(err instanceof ApiError ? err.message : 'Failed to load notes');
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await UsersService.getUsers();
+      setUsers(response.data);
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+      setError(err instanceof ApiError ? err.message : 'Failed to load users');
+    }
+  };
+
+  const addProject = async () => {
+    if (!newProjectName.trim()) return;
+
+    try {
+      setIsProjectLoading(true);
+      setError(null);
+      
+
+      const tempProject: Project = {
+        id: `temp-${Date.now()}`,
         name: newProjectName.trim(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         notes: [],
       };
-      setProjects((prevProjects) => [...prevProjects, newProject]);
+      setProjects(prev => [...prev, tempProject]);
+      setSelectedProjectId(tempProject.id);
+
+      const newProject = await ProjectsService.createProject({
+        name: newProjectName.trim()
+      });
+
+
+      setProjects(prev => prev.map(p => 
+        p.id === tempProject.id ? newProject : p
+      ));
       setSelectedProjectId(newProject.id);
       setNewProjectName("");
       setIsAddingProject(false);
+    } catch (err) {
+
+      setProjects(prev => prev.filter(p => !p.id.startsWith('temp-')));
+      console.error('Failed to create project:', err);
+      setError(err instanceof ApiError ? err.message : 'Failed to create project');
+    } finally {
+      setIsProjectLoading(false);
     }
   };
 
@@ -144,116 +127,210 @@ function App() {
     }
   };
 
-  const removeProject = (projectId: string) => {
-    setProjects((prevProjects) => {
-      const updatedProjects = prevProjects.filter((p) => p.id !== projectId);
+  const removeProject = async (projectId: string) => {
+    try {
+      setIsProjectLoading(true);
+      setError(null);
 
+
+      setProjects(prev => prev.filter(p => p.id !== projectId));
+      
       if (selectedProjectId === projectId) {
-        setSelectedProjectId(
-          updatedProjects.length > 0 ? updatedProjects[0].id : ""
-        );
+        const remainingProjects = projects.filter(p => p.id !== projectId);
+        setSelectedProjectId(remainingProjects.length > 0 ? remainingProjects[0].id : "");
       }
 
-      return updatedProjects;
-    });
-  };
+      await ProjectsService.deleteProject(projectId);
+      
 
-  const editNote = (noteId: string, newContent: string) => {
-    setProjects((prevProjects) =>
-      prevProjects.map((project) => ({
-        ...project,
-        notes: project.notes.map((note) =>
-          note.id === noteId ? { ...note, content: newContent } : note
-        ),
-      }))
-    );
-  };
-
-  const updateNoteStatus = (noteId: string, newStatus: NoteStatus) => {
-    setProjects((prevProjects) =>
-      prevProjects.map((project) => ({
-        ...project,
-        notes: project.notes.map((note) =>
-          note.id === noteId ? { ...note, status: newStatus } : note
-        ),
-      }))
-    );
-  };
-
-  const deleteNote = async (noteId: string) => {
-    if (deletingNoteId === noteId) return;
-
-    setDeletingNoteId(noteId);
-
-    const originalProjects = projects;
-    setProjects((prevProjects) =>
-      prevProjects.map((project) => ({
-        ...project,
-        notes: project.notes.filter((note) => note.id !== noteId),
-      }))
-    );
-
-    try {
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (Math.random() > 0.1) {
-            resolve(undefined);
-          } else {
-            reject(new Error("Failed to delete note"));
-          }
-        }, 500);
+      setProjectNotes(prev => {
+        const updated = { ...prev };
+        delete updated[projectId];
+        return updated;
       });
+    } catch (err) {
 
-      setDeletingNoteId(null);
-    } catch (error) {
-      setProjects(originalProjects);
-      setDeletingNoteId(null);
-      console.error("Failed to delete note:", error);
-      alert("Failed to delete note. Please try again.");
+      fetchProjects();
+      console.error('Failed to delete project:', err);
+      setError(err instanceof ApiError ? err.message : 'Failed to delete project');
+    } finally {
+      setIsProjectLoading(false);
     }
   };
 
-  const addNote = () => {
-    if (!newNoteContent.trim() || !selectedProjectId) return;
-
-    const newNote: ProjectNote = {
-      id: Date.now().toString(),
-      content: newNoteContent.trim(),
-      color: newNoteColor,
-      status: newNoteStatus,
-    };
-
-    setProjects((prevProjects) =>
-      prevProjects.map((project) =>
-        project.id === selectedProjectId
-          ? { ...project, notes: [...project.notes, newNote] }
-          : project
-      )
-    );
-
-    setNewNoteContent("");
-    setNewNoteColor("yellow");
-    setNewNoteStatus(NoteStatus.BACKLOG);
-    setIsAddingNote(false);
-  };
-
-  const addNoteToBoard = (content: string, color: "yellow" | "pink" | "blue" | "green", status: NoteStatus) => {
+  const editNote = async (noteId: string, newContent: string) => {
     if (!selectedProjectId) return;
 
-    const newNote: ProjectNote = {
-      id: Date.now().toString(),
-      content,
-      color,
-      status,
-    };
+    try {
+      setError(null);
+      
 
-    setProjects((prevProjects) =>
-      prevProjects.map((project) =>
-        project.id === selectedProjectId
-          ? { ...project, notes: [...project.notes, newNote] }
-          : project
-      )
-    );
+      setProjectNotes(prev => ({
+        ...prev,
+        [selectedProjectId]: prev[selectedProjectId]?.map(note =>
+          note.id === noteId ? { ...note, content: newContent } : note
+        ) || []
+      }));
+
+      await NotesService.updateNote(noteId, { content: newContent });
+    } catch (err) {
+
+      fetchProjectNotes(selectedProjectId);
+      console.error('Failed to update note:', err);
+      setError(err instanceof ApiError ? err.message : 'Failed to update note');
+    }
+  };
+
+  const updateNoteStatus = async (noteId: string, newStatus: NoteStatus) => {
+    if (!selectedProjectId) return;
+
+    try {
+      setError(null);
+      
+
+      setProjectNotes(prev => ({
+        ...prev,
+        [selectedProjectId]: prev[selectedProjectId]?.map(note =>
+          note.id === noteId ? { ...note, status: newStatus } : note
+        ) || []
+      }));
+
+      await NotesService.updateNote(noteId, { status: newStatus });
+    } catch (err) {
+
+      fetchProjectNotes(selectedProjectId);
+      console.error('Failed to update note status:', err);
+      setError(err instanceof ApiError ? err.message : 'Failed to update note status');
+    }
+  };
+
+  const deleteNote = async (noteId: string) => {
+    if (deletingNoteId === noteId || !selectedProjectId) return;
+
+    setDeletingNoteId(noteId);
+    setError(null);
+
+    try {
+
+      setProjectNotes(prev => ({
+        ...prev,
+        [selectedProjectId]: prev[selectedProjectId]?.filter(note => note.id !== noteId) || []
+      }));
+
+      await NotesService.deleteNote(noteId);
+      setDeletingNoteId(null);
+    } catch (err) {
+
+      fetchProjectNotes(selectedProjectId);
+      setDeletingNoteId(null);
+      console.error('Failed to delete note:', err);
+      setError(err instanceof ApiError ? err.message : 'Failed to delete note');
+    }
+  };
+
+  const addNote = async () => {
+    if (!newNoteContent.trim() || !selectedProjectId) return;
+
+    try {
+      setIsNoteLoading(true);
+      setError(null);
+
+
+      const tempNote: ProjectNote = {
+        id: `temp-${Date.now()}`,
+        content: newNoteContent.trim(),
+        color: newNoteColor,
+        status: NoteStatus.BACKLOG,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        projectId: selectedProjectId,
+      };
+
+      setProjectNotes(prev => ({
+        ...prev,
+        [selectedProjectId]: [...(prev[selectedProjectId] || []), tempNote]
+      }));
+
+      const newNote = await NotesService.createNote({
+        content: newNoteContent.trim(),
+        color: newNoteColor,
+        status: NoteStatus.BACKLOG,
+        projectId: selectedProjectId,
+        userId: newNoteUserId || undefined,
+      });
+
+
+      setProjectNotes(prev => ({
+        ...prev,
+        [selectedProjectId]: prev[selectedProjectId]?.map(note =>
+          note.id === tempNote.id ? newNote : note
+        ) || []
+      }));
+
+      setNewNoteContent("");
+      setNewNoteColor("yellow");
+      setNewNoteUserId("");
+      setIsAddingNote(false);
+    } catch (err) {
+
+      setProjectNotes(prev => ({
+        ...prev,
+        [selectedProjectId]: prev[selectedProjectId]?.filter(note => !note.id.startsWith('temp-')) || []
+      }));
+      console.error('Failed to create note:', err);
+      setError(err instanceof ApiError ? err.message : 'Failed to create note');
+    } finally {
+      setIsNoteLoading(false);
+    }
+  };
+
+  const addNoteToBoard = async (content: string, color: "yellow" | "pink" | "blue" | "green", status: NoteStatus, userId?: string) => {
+    if (!selectedProjectId) return;
+
+    try {
+      setError(null);
+
+
+      const tempNote: ProjectNote = {
+        id: `temp-${Date.now()}`,
+        content,
+        color,
+        status: NoteStatus.BACKLOG,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        projectId: selectedProjectId,
+        userId,
+      };
+
+      setProjectNotes(prev => ({
+        ...prev,
+        [selectedProjectId]: [...(prev[selectedProjectId] || []), tempNote]
+      }));
+
+      const newNote = await NotesService.createNote({
+        content,
+        color,
+        status: NoteStatus.BACKLOG,
+        projectId: selectedProjectId,
+        userId: userId || undefined,
+      });
+
+
+      setProjectNotes(prev => ({
+        ...prev,
+        [selectedProjectId]: prev[selectedProjectId]?.map(note =>
+          note.id === tempNote.id ? newNote : note
+        ) || []
+      }));
+    } catch (err) {
+
+      setProjectNotes(prev => ({
+        ...prev,
+        [selectedProjectId]: prev[selectedProjectId]?.filter(note => !note.id.startsWith('temp-')) || []
+      }));
+      console.error('Failed to create note:', err);
+      setError(err instanceof ApiError ? err.message : 'Failed to create note');
+    }
   };
 
   const handleAddNoteKeyPress = (e: React.KeyboardEvent) => {
@@ -264,15 +341,52 @@ function App() {
       setIsAddingNote(false);
       setNewNoteContent("");
       setNewNoteColor("yellow");
-      setNewNoteStatus(NoteStatus.BACKLOG);
+      setNewNoteUserId("");
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="background">
+        <div className="page-container">
+          <h1 className="primary">Projects & Notes</h1>
+          <div style={{ height: "16px" }} />
+          <div className="loading-container" style={{ textAlign: 'center', padding: '2rem' }}>
+            <p>Loading projects...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="background">
       <div className="page-container">
         <h1 className="primary">Projects & Notes</h1>
         <div style={{ height: "16px" }} />
+        {error && (
+          <div className="error-message" style={{ 
+            color: '#ff4444', 
+            background: '#ffeeee', 
+            padding: '1rem', 
+            borderRadius: '4px', 
+            marginBottom: '1rem' 
+          }}>
+            {error}
+            <button 
+              onClick={() => setError(null)}
+              style={{ 
+                marginLeft: '1rem', 
+                background: 'none', 
+                border: 'none', 
+                color: '#ff4444', 
+                cursor: 'pointer' 
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
         <main className="flex">
           <div className="projects-sidebar">
             <div className="projects-header">
@@ -281,8 +395,9 @@ function App() {
                 className="add-project-btn"
                 onClick={() => setIsAddingProject(true)}
                 aria-label="Add new project"
+                disabled={isProjectLoading}
               >
-                +
+                {isProjectLoading ? "..." : "+"}
               </button>
             </div>
             <ul className="gray-text">
@@ -296,7 +411,7 @@ function App() {
                   >
                     {project.name}
                     <span className="notes-count">
-                      ({project.notes.length})
+                      ({projectNotes[project.id]?.length || 0})
                     </span>
                   </button>
                   <button
@@ -382,16 +497,17 @@ function App() {
             </div>
             {viewMode === "board" && selectedProject ? (
               <DragDropBoard
-                notes={selectedProject.notes}
+                notes={selectedProjectNotes}
                 onEdit={editNote}
                 onDelete={deleteNote}
                 onStatusChange={updateNoteStatus}
                 onAddNote={addNoteToBoard}
                 deletingNoteId={deletingNoteId}
+                users={users}
               />
             ) : (
               <div className="notes-container flex">
-                {selectedProject?.notes.map((note) => (
+                {selectedProjectNotes.map((note) => (
                   <Note
                     key={note.id}
                     id={note.id}
@@ -436,20 +552,19 @@ function App() {
                               )
                             )}
                           </div>
-                          <div className="status-picker">
-                            <label className="option-label">Status:</label>
+                          <div className="user-picker">
+                            <label className="option-label">Assign to:</label>
                             <select
-                              value={newNoteStatus}
-                              onChange={(e) =>
-                                setNewNoteStatus(e.target.value as NoteStatus)
-                              }
-                              className="status-select"
+                              value={newNoteUserId}
+                              onChange={(e) => setNewNoteUserId(e.target.value)}
+                              className="user-select"
                             >
-                              <option value={NoteStatus.BACKLOG}>
-                                Backlog
-                              </option>
-                              <option value={NoteStatus.DOING}>Doing</option>
-                              <option value={NoteStatus.DONE}>Done</option>
+                              <option value="">Unassigned</option>
+                              {users.map((user) => (
+                                <option key={user.id} value={user.id}>
+                                  {user.name}
+                                </option>
+                              ))}
                             </select>
                           </div>
                         </div>
@@ -457,17 +572,17 @@ function App() {
                           <button
                             onClick={addNote}
                             className="save-note-btn"
-                            disabled={!newNoteContent.trim()}
+                            disabled={!newNoteContent.trim() || isNoteLoading}
                             type="button"
                           >
-                            ✓
+                            {isNoteLoading ? "..." : "✓"}
                           </button>
                           <button
                             onClick={() => {
                               setIsAddingNote(false);
                               setNewNoteContent("");
                               setNewNoteColor("yellow");
-                              setNewNoteStatus(NoteStatus.BACKLOG);
+                              setNewNoteUserId("");
                             }}
                             className="cancel-note-btn"
                             type="button"
@@ -479,7 +594,7 @@ function App() {
                     </div>
                   </div>
                 )}
-                {!selectedProject?.notes.length && !isAddingNote && (
+                {!selectedProjectNotes.length && !isAddingNote && selectedProject && (
                   <div className="empty-state">
                     <p>No notes in this project yet.</p>
                   </div>
