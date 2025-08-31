@@ -104,6 +104,14 @@ function App() {
   ]);
 
   const [selectedProjectId, setSelectedProjectId] = useState<string>("1");
+  const [newProjectName, setNewProjectName] = useState<string>("");
+  const [isAddingProject, setIsAddingProject] = useState<boolean>(false);
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
+  const [isAddingNote, setIsAddingNote] = useState<boolean>(false);
+  const [newNoteContent, setNewNoteContent] = useState<string>("");
+  const [newNoteColor, setNewNoteColor] = useState<
+    "yellow" | "pink" | "blue" | "green"
+  >("yellow");
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
 
@@ -118,43 +126,282 @@ function App() {
     );
   };
 
+  const addProject = () => {
+    if (newProjectName.trim()) {
+      const newProject: Project = {
+        id: Date.now().toString(),
+        name: newProjectName.trim(),
+        notes: [],
+      };
+      setProjects((prevProjects) => [...prevProjects, newProject]);
+      setSelectedProjectId(newProject.id);
+      setNewProjectName("");
+      setIsAddingProject(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      addProject();
+    } else if (e.key === "Escape") {
+      setIsAddingProject(false);
+      setNewProjectName("");
+    }
+  };
+
+  const removeProject = (projectId: string) => {
+    setProjects((prevProjects) => {
+      const updatedProjects = prevProjects.filter((p) => p.id !== projectId);
+
+      if (selectedProjectId === projectId) {
+        setSelectedProjectId(
+          updatedProjects.length > 0 ? updatedProjects[0].id : ""
+        );
+      }
+
+      return updatedProjects;
+    });
+  };
+
+  const editNote = (noteId: string, newContent: string) => {
+    setProjects((prevProjects) =>
+      prevProjects.map((project) => ({
+        ...project,
+        notes: project.notes.map((note) =>
+          note.id === noteId ? { ...note, content: newContent } : note
+        ),
+      }))
+    );
+  };
+
+  const deleteNote = async (noteId: string) => {
+    if (deletingNoteId === noteId) return;
+
+    setDeletingNoteId(noteId);
+
+    const originalProjects = projects;
+    setProjects((prevProjects) =>
+      prevProjects.map((project) => ({
+        ...project,
+        notes: project.notes.filter((note) => note.id !== noteId),
+      }))
+    );
+
+    try {
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if (Math.random() > 0.1) {
+            resolve(undefined);
+          } else {
+            reject(new Error("Failed to delete note"));
+          }
+        }, 500);
+      });
+
+      setDeletingNoteId(null);
+    } catch (error) {
+      setProjects(originalProjects);
+      setDeletingNoteId(null);
+      console.error("Failed to delete note:", error);
+      alert("Failed to delete note. Please try again.");
+    }
+  };
+
+  const addNote = () => {
+    if (!newNoteContent.trim() || !selectedProjectId) return;
+
+    const newNote: ProjectNote = {
+      id: Date.now().toString(),
+      content: newNoteContent.trim(),
+      color: newNoteColor,
+      checked: false,
+    };
+
+    setProjects((prevProjects) =>
+      prevProjects.map((project) =>
+        project.id === selectedProjectId
+          ? { ...project, notes: [...project.notes, newNote] }
+          : project
+      )
+    );
+
+    setNewNoteContent("");
+    setNewNoteColor("yellow");
+    setIsAddingNote(false);
+  };
+
+  const handleAddNoteKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      addNote();
+    } else if (e.key === "Escape") {
+      setIsAddingNote(false);
+      setNewNoteContent("");
+      setNewNoteColor("yellow");
+    }
+  };
+
   return (
     <div className="background">
       <div className="page-container">
         <h1 className="primary">Projects & Notes</h1>
         <main className="flex">
           <div className="projects-sidebar">
-            <h2 className="primary-text">Projects</h2>
+            <div className="projects-header">
+              <h2 className="primary-text">Projects</h2>
+              <button
+                className="add-project-btn"
+                onClick={() => setIsAddingProject(true)}
+                aria-label="Add new project"
+              >
+                +
+              </button>
+            </div>
             <ul className="gray-text">
               {projects.map((project) => (
-                <button
-                  key={project.id}
-                  className={`project-item ${
-                    selectedProjectId === project.id ? "active" : ""
-                  }`}
-                  onClick={() => setSelectedProjectId(project.id)}
-                >
-                  {project.name}
-                  <span className="notes-count">({project.notes.length})</span>
-                </button>
+                <li key={project.id} className="project-item-container">
+                  <button
+                    className={`project-item ${
+                      selectedProjectId === project.id ? "active" : ""
+                    }`}
+                    onClick={() => setSelectedProjectId(project.id)}
+                  >
+                    {project.name}
+                    <span className="notes-count">
+                      ({project.notes.length})
+                    </span>
+                  </button>
+                  <button
+                    className="delete-project-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeProject(project.id);
+                    }}
+                    aria-label={`Delete ${project.name}`}
+                    type="button"
+                  >
+                    ✕
+                  </button>
+                </li>
               ))}
+              {isAddingProject && (
+                <li className="new-project-form">
+                  <input
+                    type="text"
+                    placeholder="Project name"
+                    value={newProjectName}
+                    onChange={(e) => setNewProjectName(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    className="new-project-input"
+                    autoFocus
+                  />
+                  <div className="form-actions flex">
+                    <button
+                      onClick={addProject}
+                      className="save-btn"
+                      disabled={!newProjectName.trim()}
+                    >
+                      ✓
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsAddingProject(false);
+                        setNewProjectName("");
+                      }}
+                      className="cancel-btn"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </li>
+              )}
             </ul>
           </div>
-          <div className="notes-container flex">
-            {selectedProject?.notes.map((note) => (
-              <Note
-                key={note.id}
-                content={note.content}
-                color={note.color}
-                checked={note.checked}
-                onToggle={() => toggleNoteChecked(note.id)}
-              />
-            ))}
-            {!selectedProject?.notes.length && (
-              <div className="empty-state">
-                <p>No notes in this project yet.</p>
-              </div>
-            )}
+          <div className="notes-section">
+            <div className="notes-header">
+              <h2 className="primary-text">Notes</h2>
+              {selectedProject && (
+                <button
+                  className="add-note-btn"
+                  onClick={() => setIsAddingNote(true)}
+                  aria-label="Add new note"
+                >
+                  +
+                </button>
+              )}
+            </div>
+            <div className="notes-container flex">
+              {selectedProject?.notes.map((note) => (
+                <Note
+                  key={note.id}
+                  content={note.content}
+                  color={note.color}
+                  checked={note.checked}
+                  onToggle={() => toggleNoteChecked(note.id)}
+                  onEdit={(newContent) => editNote(note.id, newContent)}
+                  onDelete={() => deleteNote(note.id)}
+                  isDeleting={deletingNoteId === note.id}
+                />
+              ))}
+              {isAddingNote && (
+                <div className={`note note--${newNoteColor} note--adding`}>
+                  <div className="add-note-form">
+                    <textarea
+                      value={newNoteContent}
+                      onChange={(e) => setNewNoteContent(e.target.value)}
+                      onKeyDown={handleAddNoteKeyPress}
+                      className="add-note-input"
+                      placeholder="Enter note content..."
+                      autoFocus
+                      rows={4}
+                    />
+                    <div className="add-note-controls">
+                      <div className="color-picker">
+                        {(["yellow", "pink", "blue", "green"] as const).map(
+                          (color) => (
+                            <button
+                              key={color}
+                              className={`color-option color-option--${color} ${
+                                newNoteColor === color ? "active" : ""
+                              }`}
+                              onClick={() => setNewNoteColor(color)}
+                              aria-label={`Select ${color} color`}
+                              type="button"
+                            />
+                          )
+                        )}
+                      </div>
+                      <div className="form-actions">
+                        <button
+                          onClick={addNote}
+                          className="save-note-btn"
+                          disabled={!newNoteContent.trim()}
+                          type="button"
+                        >
+                          ✓
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsAddingNote(false);
+                            setNewNoteContent("");
+                            setNewNoteColor("yellow");
+                          }}
+                          className="cancel-note-btn"
+                          type="button"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {!selectedProject?.notes.length && !isAddingNote && (
+                <div className="empty-state">
+                  <p>No notes in this project yet.</p>
+                </div>
+              )}
+            </div>
           </div>
         </main>
       </div>

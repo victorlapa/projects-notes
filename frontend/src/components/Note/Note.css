@@ -76,6 +76,137 @@
   color: white;
 }
 
+.note__actions {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.note:hover .note__actions {
+  opacity: 1;
+}
+
+.note__edit-btn,
+.note__delete-btn {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #666;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #666;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-family: inherit;
+}
+
+.note__edit-btn:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #333;
+  transform: scale(1.05);
+}
+
+.note__delete-btn:hover:not(:disabled) {
+  background-color: rgba(220, 53, 69, 0.9);
+  color: white;
+  border-color: #dc3545;
+  transform: scale(1.05);
+}
+
+.note__delete-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.note--deleting {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.note--editing {
+  height: auto;
+  min-height: 200px;
+}
+
+.note__edit-form {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.note__edit-input {
+  width: 100%;
+  flex: 1;
+  padding: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  resize: none;
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 8px;
+}
+
+.note__edit-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.edit-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.save-edit-btn, .cancel-edit-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-family: inherit;
+}
+
+.save-edit-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.save-edit-btn:hover:not(:disabled) {
+  background-color: #1e7e34;
+}
+
+.save-edit-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.cancel-edit-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.cancel-edit-btn:hover {
+  background-color: #c82333;
+}
+
 .note__content {
   height: 100%;
   display: flex;
@@ -85,4 +216,7 @@
   color: #333;
   white-space: pre-wrap;
   padding-right: 30px;
+  padding-left: 8px;
+  padding-bottom: 12px;
+  cursor: text;
 }
