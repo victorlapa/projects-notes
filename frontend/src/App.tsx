@@ -237,6 +237,25 @@ function App() {
     setIsAddingNote(false);
   };
 
+  const addNoteToBoard = (content: string, color: "yellow" | "pink" | "blue" | "green", status: NoteStatus) => {
+    if (!selectedProjectId) return;
+
+    const newNote: ProjectNote = {
+      id: Date.now().toString(),
+      content,
+      color,
+      status,
+    };
+
+    setProjects((prevProjects) =>
+      prevProjects.map((project) =>
+        project.id === selectedProjectId
+          ? { ...project, notes: [...project.notes, newNote] }
+          : project
+      )
+    );
+  };
+
   const handleAddNoteKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -351,7 +370,7 @@ function App() {
                   </button>
                 </div>
               </div>
-              {selectedProject && (
+              {selectedProject && viewMode === "list" && (
                 <button
                   className="add-note-btn"
                   onClick={() => setIsAddingNote(true)}
@@ -367,6 +386,7 @@ function App() {
                 onEdit={editNote}
                 onDelete={deleteNote}
                 onStatusChange={updateNoteStatus}
+                onAddNote={addNoteToBoard}
                 deletingNoteId={deletingNoteId}
               />
             ) : (

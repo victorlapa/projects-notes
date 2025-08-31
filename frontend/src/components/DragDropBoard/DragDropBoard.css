@@ -30,6 +30,12 @@
   border-bottom: 2px solid rgba(0, 0, 0, 0.1);
 }
 
+.column-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .column-title {
   margin: 0;
   font-size: 18px;
@@ -77,6 +83,153 @@
   color: #6b7280;
   font-style: italic;
   margin: 0;
+}
+
+.add-note-btn-column {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #28a745;
+  background-color: #28a745;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.add-note-btn-column:hover {
+  background-color: #1e7e34;
+  border-color: #1e7e34;
+  transform: scale(1.1);
+}
+
+.note--adding-board {
+  min-height: 150px;
+  border: 2px dashed rgba(40, 167, 69, 0.3);
+  background-color: rgba(40, 167, 69, 0.05) !important;
+}
+
+.add-note-form-board {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px;
+}
+
+.add-note-input-board {
+  width: 100%;
+  flex: 1;
+  padding: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  resize: none;
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.add-note-input-board:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1);
+}
+
+.add-note-controls-board {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-picker-board {
+  display: flex;
+  gap: 4px;
+}
+
+.color-option-board {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.color-option-board--yellow {
+  background: linear-gradient(135deg, #fff740 0%, #ffed4e 100%);
+}
+
+.color-option-board--pink {
+  background: linear-gradient(135deg, #ff9a9e 0%, #ff9a9e 100%);
+}
+
+.color-option-board--blue {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+}
+
+.color-option-board--green {
+  background: linear-gradient(135deg, #d9ed92 0%, #b5e48c 100%);
+}
+
+.color-option-board.active {
+  border-color: #333;
+  transform: scale(1.2);
+}
+
+.color-option-board:hover {
+  transform: scale(1.1);
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.form-actions-board {
+  display: flex;
+  gap: 4px;
+}
+
+.save-note-btn-board,
+.cancel-note-btn-board {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: none;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.save-note-btn-board {
+  background-color: #28a745;
+  color: white;
+}
+
+.save-note-btn-board:hover:not(:disabled) {
+  background-color: #1e7e34;
+}
+
+.save-note-btn-board:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.cancel-note-btn-board {
+  background-color: #dc3545;
+  color: white;
+}
+
+.cancel-note-btn-board:hover {
+  background-color: #c82333;
 }
 
 /* Note modifications for drag and drop */
