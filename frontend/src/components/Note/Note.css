@@ -66,8 +66,6 @@
   opacity: 0.9;
 }
 
-
-
 .note__actions {
   position: absolute;
   bottom: 8px;
@@ -142,7 +140,6 @@
 
 .note--editing {
   height: auto;
-  min-height: 200px;
 }
 
 .note__edit-form {
@@ -165,6 +162,7 @@
   outline: none;
   background-color: rgba(255, 255, 255, 0.9);
   margin-bottom: 8px;
+  margin-top: 16px;
 }
 
 .note__edit-input:focus {
@@ -178,7 +176,8 @@
   justify-content: flex-end;
 }
 
-.save-edit-btn, .cancel-edit-btn {
+.save-edit-btn,
+.cancel-edit-btn {
   width: 24px;
   height: 24px;
   border-radius: 4px;

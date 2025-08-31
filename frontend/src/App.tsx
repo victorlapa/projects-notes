@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import Note from "./components/Note/Note";
 import DragDropBoard from "./components/DragDropBoard/DragDropBoard";
+import ConfirmationModal from "./components/ConfirmationModal/ConfirmationModal";
 import { NoteStatus } from "./types";
 import type { Project, ProjectNote } from "./types";
 import { ProjectsService, NotesService, UsersService, ApiError } from "./services";
@@ -28,6 +29,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [isProjectLoading, setIsProjectLoading] = useState(false);
   const [isNoteLoading, setIsNoteLoading] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
   const selectedProjectNotes = selectedProjectId ? projectNotes[selectedProjectId] || [] : [];
@@ -127,6 +129,10 @@ function App() {
     }
   };
 
+  const confirmDeleteProject = (project: Project) => {
+    setProjectToDelete(project);
+  };
+
   const removeProject = async (projectId: string) => {
     try {
       setIsProjectLoading(true);
@@ -148,6 +154,8 @@ function App() {
         delete updated[projectId];
         return updated;
       });
+      
+      setProjectToDelete(null);
     } catch (err) {
 
       fetchProjects();
@@ -418,7 +426,7 @@ function App() {
                     className="delete-project-btn"
                     onClick={(e) => {
                       e.stopPropagation();
-                      removeProject(project.id);
+                      confirmDeleteProject(project);
                     }}
                     aria-label={`Delete ${project.name}`}
                     type="button"
@@ -603,6 +611,17 @@ function App() {
             )}
           </div>
         </main>
+        
+        <ConfirmationModal
+          isOpen={projectToDelete !== null}
+          title="Delete Project"
+          message={`Are you sure you want to delete "${projectToDelete?.name}"? This action cannot be undone and will delete all notes in this project.`}
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          onConfirm={() => projectToDelete && removeProject(projectToDelete.id)}
+          onCancel={() => setProjectToDelete(null)}
+          isLoading={isProjectLoading}
+        />
       </div>
     </div>
   );
