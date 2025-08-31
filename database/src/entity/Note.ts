@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm"
 import { Project } from "./Project"
+import { User } from "./User"
 
 export enum NoteStatus {
     BACKLOG = "BACKLOG",
@@ -37,5 +38,8 @@ export class Note {
 
     @ManyToOne(() => Project, project => project.notes)
     project: Project
+
+    @ManyToOne(() => User, user => user.notes)
+    user: User
 
 }
