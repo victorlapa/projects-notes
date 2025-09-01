@@ -1,3 +1,5 @@
+import { etagCache } from './etagCache';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export interface PaginationResult<T> {
@@ -24,6 +26,7 @@ export class ApiError extends Error {
 
 class ApiClient {
   private baseURL: string;
+  private pendingRequests = new Map<string, Promise<any>>();
 
   constructor(baseURL: string) {
     this.baseURL = baseURL;
@@ -31,7 +34,32 @@ class ApiClient {
 
   private async makeRequest<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    method: string = 'GET'
+  ): Promise<T> {
+    const requestKey = `${method}:${endpoint}:${JSON.stringify(options.body || {})}`;
+    
+    if (this.pendingRequests.has(requestKey)) {
+      return this.pendingRequests.get(requestKey) as Promise<T>;
+    }
+
+    const requestPromise = this.executeRequest<T>(endpoint, options, method);
+    this.pendingRequests.set(requestKey, requestPromise);
+
+    try {
+      const result = await requestPromise;
+      this.pendingRequests.delete(requestKey);
+      return result;
+    } catch (error) {
+      this.pendingRequests.delete(requestKey);
+      throw error;
+    }
+  }
+
+  private async executeRequest<T>(
+    endpoint: string,
+    options: RequestInit = {},
+    method: string = 'GET'
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     
@@ -60,6 +88,11 @@ class ApiClient {
         throw new ApiError(errorMessage, response.status, errorData);
       }
 
+      const etag = response.headers.get('etag');
+      if (etag && ['GET', 'POST', 'PATCH'].includes(method)) {
+        const cacheKey = etagCache.generateKey(method, endpoint);
+        etagCache.set(cacheKey, etag);
+      }
 
       if (response.status === 204) {
         return undefined as unknown as T;
@@ -89,7 +122,7 @@ class ApiClient {
       url += `?${searchParams.toString()}`;
     }
     
-    return this.makeRequest<T>(url, { method: 'GET' });
+    return this.makeRequest<T>(url, { method: 'GET' }, 'GET');
   }
 
   async post<T>(
@@ -109,7 +142,7 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify(data),
       headers,
-    });
+    }, 'POST');
   }
 
   async patch<T>(
@@ -121,17 +154,28 @@ class ApiClient {
     
     if (options.etag) {
       headers['If-Match'] = options.etag;
+    } else {
+      const cacheKey = etagCache.generateKey('GET', endpoint);
+      const cachedETag = etagCache.get(cacheKey);
+      if (cachedETag) {
+        headers['If-Match'] = cachedETag;
+      }
     }
 
     return this.makeRequest<T>(endpoint, {
       method: 'PATCH',
       body: JSON.stringify(data),
       headers,
-    });
+    }, 'PATCH');
   }
 
   async delete(endpoint: string): Promise<void> {
-    return this.makeRequest<void>(endpoint, { method: 'DELETE' });
+    const result = await this.makeRequest<void>(endpoint, { method: 'DELETE' }, 'DELETE');
+    
+    const getCacheKey = etagCache.generateKey('GET', endpoint);
+    etagCache.delete(getCacheKey);
+    
+    return result;
   }
 }
 
