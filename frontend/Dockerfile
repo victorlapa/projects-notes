@@ -9,6 +9,7 @@ RUN npm ci --only=production
 FROM base AS build
 COPY package*.json ./
 RUN npm ci
+COPY .env ./
 COPY . .
 RUN npm run build
 
