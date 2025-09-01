@@ -25,6 +25,7 @@ npm install - frontend backend database
 npm run bootstrap
 
 # Run Docker instances
+docker-compose up postgres -d
 # This will start all required services
 ```
 
@@ -45,6 +46,7 @@ cp .env.example .env
 ## Local Development
 
 ### Backend
+
 ```bash
 cd backend
 npm install
@@ -52,16 +54,11 @@ npm run start:dev
 ```
 
 ### Frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
-```
-
-### Database
-Set up PostgreSQL locally or use the Docker PostgreSQL service:
-```bash
-docker-compose up postgres -d
 ```
 
 ## Features
