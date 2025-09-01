@@ -42,6 +42,15 @@ function App() {
       setError(null);
       const response = await ProjectsService.getProjects();
       setProjects(response.data);
+      
+      const initialProjectNotes: Record<string, ProjectNote[]> = {};
+      response.data.forEach(project => {
+        if (project.notes) {
+          initialProjectNotes[project.id] = project.notes;
+        }
+      });
+      setProjectNotes(prev => ({ ...prev, ...initialProjectNotes }));
+      
       if (response.data.length > 0 && !selectedProjectId) {
         setSelectedProjectId(response.data[0].id);
       }
