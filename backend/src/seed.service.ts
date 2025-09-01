@@ -31,18 +31,18 @@ export class SeedService implements OnModuleInit {
     console.log('Seeding database with sample data...');
 
     const user1 = this.userRepository.create({
-      name: 'John Doe'
+      name: 'John Doe',
     });
     const user2 = this.userRepository.create({
-      name: 'Jane Smith'
+      name: 'Jane Smith',
     });
     await this.userRepository.save([user1, user2]);
 
     const project1 = this.projectRepository.create({
-      name: 'Mobile App Development'
+      name: 'Mobile App',
     });
     const project2 = this.projectRepository.create({
-      name: 'Website Redesign'
+      name: 'Website Redesign',
     });
     await this.projectRepository.save([project1, project2]);
 
@@ -52,35 +52,35 @@ export class SeedService implements OnModuleInit {
         color: NoteColor.BLUE,
         status: NoteStatus.DONE,
         projectId: project1.id,
-        userId: user1.id
+        userId: user1.id,
       }),
       this.noteRepository.create({
         content: 'Design user authentication flow',
         color: NoteColor.YELLOW,
         status: NoteStatus.DOING,
         projectId: project1.id,
-        userId: user1.id
+        userId: user1.id,
       }),
       this.noteRepository.create({
         content: 'Implement API endpoints for user management',
         color: NoteColor.PINK,
         status: NoteStatus.BACKLOG,
         projectId: project1.id,
-        userId: user2.id
+        userId: user2.id,
       }),
       this.noteRepository.create({
         content: 'Create responsive navigation component',
         color: NoteColor.GREEN,
         status: NoteStatus.DOING,
         projectId: project2.id,
-        userId: user2.id
+        userId: user2.id,
       }),
       this.noteRepository.create({
         content: 'Update brand colors and typography',
         color: NoteColor.YELLOW,
         status: NoteStatus.BACKLOG,
-        projectId: project2.id
-      })
+        projectId: project2.id,
+      }),
     ];
 
     await this.noteRepository.save(notes);
