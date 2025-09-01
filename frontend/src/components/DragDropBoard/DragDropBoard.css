@@ -4,6 +4,7 @@
   gap: 24px;
   height: 100%;
   padding: 16px;
+  overflow-x: auto;
 }
 
 .board-column {
@@ -147,6 +148,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .color-picker-board {
@@ -270,13 +272,258 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .drag-drop-board {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(250px, 1fr));
     gap: 16px;
+    padding: 12px;
   }
-  
+}
+
+@media (max-width: 768px) {
+  .add-note-btn-column {
+    width: 16px;
+    height: 16px;
+  }
+
+  .drag-drop-board {
+    grid-template-columns: repeat(3, minmax(200px, 300px));
+    gap: 12px;
+    padding: 8px;
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .board-column {
-    min-height: 300px;
+    min-height: 400px;
+    min-width: 200px;
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+
+  .board-column__header {
+    position: sticky;
+    top: 0;
+    background: inherit;
+    z-index: 10;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+  }
+
+  .board-column__content {
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+  }
+
+  .note--adding-board {
+    min-height: 120px;
+  }
+
+  .add-note-form-board {
+    gap: 6px;
+    padding: 4px;
+  }
+
+  .add-note-input-board {
+    font-size: 12px;
+    padding: 6px;
+    min-height: 40px;
+  }
+
+  .add-note-controls-board {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .color-picker-board {
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .color-option-board {
+    width: 14px;
+    height: 14px;
+  }
+
+  .user-picker-board {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .user-select-board {
+    width: 100%;
+    max-width: 100px;
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+
+  .form-actions-board {
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .save-note-btn-board,
+  .cancel-note-btn-board {
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 600px) {
+  .drag-drop-board {
+    grid-template-columns: repeat(3, 180px);
+    gap: 10px;
+    padding: 6px;
+  }
+
+  .board-column {
+    min-width: 180px;
+    padding: 12px;
+    min-height: 350px;
+  }
+
+  .column-title {
+    font-size: 16px;
+  }
+
+  .notes-count {
+    font-size: 11px;
+    padding: 2px 6px;
+  }
+
+  .add-note-controls-board {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .color-picker-board {
+    justify-content: center;
+  }
+
+  .user-picker-board {
+    justify-content: center;
+  }
+
+  .form-actions-board {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 400px) {
+  .drag-drop-board {
+    padding: 8px;
+    gap: 12px;
+  }
+
+  .board-column {
+    padding: 12px;
+    min-height: 250px;
+  }
+
+  .board-column__header {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+  }
+
+  .column-title {
+    font-size: 16px;
+  }
+
+  .add-note-controls-board {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .color-picker-board {
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .color-option-board {
+    width: 18px;
+    height: 18px;
+  }
+
+  .user-picker-board {
+    justify-content: center;
+  }
+
+  .user-select-board {
+    width: 100%;
+    max-width: 150px;
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+
+  .form-actions-board {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .save-note-btn-board,
+  .cancel-note-btn-board {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .add-note-form-board {
+    gap: 10px;
+    padding: 6px;
+  }
+
+  .add-note-input-board {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .board-column {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .board-column--drag-over {
+    transform: none; /* Remove transform on touch devices */
+  }
+
+  .note[draggable="true"]:hover {
+    transform: none; /* Remove hover effects on touch */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+
+  .add-note-btn-column {
+    width: 16px;
+    height: 16px;
+    min-height: 16px;
+    min-width: 16px;
+    font-size: 12px;
+  }
+
+  .color-option-board {
+    width: 20px;
+    height: 20px;
+    min-height: 20px;
+    min-width: 20px;
+  }
+
+  .save-note-btn-board,
+  .cancel-note-btn-board {
+    width: 24px;
+    height: 24px;
+    min-height: 24px;
+    min-width: 24px;
+    font-size: 12px;
+  }
+
+  .user-select-board {
+    min-height: 32px;
+    font-size: 12px;
+    padding: 6px;
   }
 }

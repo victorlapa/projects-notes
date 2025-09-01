@@ -229,3 +229,115 @@
   padding-bottom: 12px;
   cursor: text;
 }
+
+/* Mobile optimizations for notes in board view */
+@media (max-width: 768px) {
+  .note {
+    margin: 0;
+    padding: 16px;
+    font-size: 13px;
+    min-height: 100px;
+  }
+  
+  .note__actions {
+    opacity: 1; /* Always visible on mobile */
+    bottom: 4px;
+    right: 4px;
+  }
+  
+  .note__edit-btn,
+  .note__delete-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    border: 2px solid #666;
+  }
+  
+  .note__content {
+    padding-top: 30px;
+    padding-bottom: 32px;
+    padding-right: 32px;
+  }
+  
+  .note__status {
+    top: 4px;
+    left: 4px;
+  }
+  
+  .status-badge {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+  
+  .note--editing {
+    min-height: 120px;
+  }
+  
+  .note__edit-input {
+    font-size: 13px;
+    padding: 10px;
+    margin-top: 12px;
+    min-height: 60px;
+  }
+  
+  .edit-actions {
+    gap: 8px;
+    justify-content: center;
+  }
+  
+  .save-edit-btn,
+  .cancel-edit-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .note {
+    padding: 12px;
+    font-size: 12px;
+    min-height: 90px;
+  }
+  
+  .note__content {
+    padding-top: 26px;
+    padding-bottom: 28px;
+    padding-right: 28px;
+  }
+  
+  .status-badge {
+    font-size: 8px;
+    padding: 2px 5px;
+  }
+  
+  .note__edit-btn,
+  .note__delete-btn {
+    width: 22px;
+    height: 22px;
+    font-size: 13px;
+  }
+  
+  .note--editing {
+    min-height: 110px;
+  }
+  
+  .note__edit-input {
+    font-size: 12px;
+    padding: 8px;
+    margin-top: 10px;
+    min-height: 50px;
+  }
+  
+  .edit-actions {
+    gap: 6px;
+    justify-content: center;
+  }
+  
+  .save-edit-btn,
+  .cancel-edit-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+}

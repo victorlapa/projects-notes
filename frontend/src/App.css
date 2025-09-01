@@ -19,10 +19,10 @@
   height: 100%;
   margin: 0 auto;
   text-align: center;
-  padding: 20px 40px;
+  padding: 20px;
 
   main {
-    gap: 30px;
+    gap: 20px;
     height: 100%;
   }
 }
@@ -30,6 +30,7 @@
 .projects-sidebar {
   min-width: 300px;
   text-align: left;
+  flex-shrink: 0;
 
   .projects-header {
     display: flex;
@@ -67,6 +68,8 @@
     list-style: none;
     padding-right: 20px;
     height: 100%;
+    margin: 0;
+    padding-left: 0;
   }
 
   .project-item-container {
@@ -487,4 +490,153 @@
   height: 200px;
   color: #666;
   font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 10px;
+    height: 100vh;
+
+    main {
+      flex-direction: column;
+      gap: 15px;
+    }
+  }
+
+  .background h1 {
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+
+  .projects-sidebar {
+    min-width: unset;
+    width: 100%;
+    order: 1;
+
+    ul {
+      border-right: none;
+      border-top: 1px solid blue;
+      padding-top: 15px;
+      padding-right: 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .projects-header {
+      margin-bottom: 8px;
+    }
+
+    .project-item {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .project-item:hover {
+      transform: none;
+    }
+
+    .notes-count {
+      font-size: 11px;
+      padding: 1px 6px;
+    }
+
+    .delete-project-btn {
+      opacity: 1;
+      position: static;
+      margin-left: 6px;
+    }
+  }
+
+  .notes-section {
+    order: 2;
+    flex: none;
+  }
+
+  .notes-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+
+  .notes-header-left {
+    gap: 15px;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .view-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .notes-container {
+    max-height: calc(100vh - 300px);
+    gap: 15px;
+  }
+
+  .add-note-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .note-options {
+    align-items: stretch;
+  }
+
+  .color-picker {
+    justify-content: center;
+  }
+
+  .user-picker {
+    justify-content: center;
+  }
+
+  .user-select {
+    min-width: 100px;
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .form-actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-container {
+    padding: 20px;
+  }
+
+  .background h1 {
+    font-size: 20px;
+  }
+
+  .projects-sidebar ul {
+    max-height: 150px;
+  }
+
+  .notes-header-left {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .notes-container {
+    max-height: calc(100vh - 350px);
+    gap: 10px;
+  }
+
+  .project-item {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .add-project-btn,
+  .add-note-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+  }
 }
