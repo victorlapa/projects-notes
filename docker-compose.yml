@@ -3,9 +3,9 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: bilor-postgres
+    container_name: billor-postgres
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-bilor}
+      POSTGRES_DB: ${POSTGRES_DB:-billor}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
@@ -14,23 +14,23 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-bilor}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-billor}"]
       interval: 30s
       timeout: 10s
       retries: 5
     networks:
-      - bilor-network
+      - billor-network
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: bilor-backend
+    container_name: billor-backend
     environment:
       NODE_ENV: production
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
-      DATABASE_NAME: ${POSTGRES_DB:-bilor}
+      DATABASE_NAME: ${POSTGRES_DB:-billor}
       DATABASE_USER: ${POSTGRES_USER:-postgres}
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       PORT: 3001
@@ -40,27 +40,27 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - bilor-network
+      - billor-network
     restart: unless-stopped
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: bilor-frontend
+    container_name: billor-frontend
     ports:
       - "${FRONTEND_PORT:-3000}:80"
     depends_on:
       - backend
     networks:
-      - bilor-network
+      - billor-network
     restart: unless-stopped
 
 volumes:
   postgres_data:
-    name: bilor-postgres-data
+    name: billor-postgres-data
 
 networks:
-  bilor-network:
-    name: bilor-network
+  billor-network:
+    name: billor-network
     driver: bridge

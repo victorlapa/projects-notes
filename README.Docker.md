@@ -12,7 +12,7 @@ This document provides instructions for running the Billor application using Doc
 1. **Clone the repository** (if you haven't already):
    ```bash
    git clone <repository-url>
-   cd bilor
+   cd billor
    ```
 
 2. **Copy environment configuration**:
@@ -40,7 +40,7 @@ Edit the `.env` file to customize your setup:
 
 ```bash
 # Database Configuration
-POSTGRES_DB=bilor
+POSTGRES_DB=billor
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_PORT=5432
@@ -116,16 +116,16 @@ docker-compose logs -t
 ### Database Operations
 ```bash
 # Access PostgreSQL shell
-docker-compose exec postgres psql -U postgres -d bilor
+docker-compose exec postgres psql -U postgres -d billor
 
 # View database logs
 docker-compose logs postgres
 
 # Backup database
-docker-compose exec postgres pg_dump -U postgres bilor > backup.sql
+docker-compose exec postgres pg_dump -U postgres billor > backup.sql
 
 # Restore database
-docker-compose exec -T postgres psql -U postgres -d bilor < backup.sql
+docker-compose exec -T postgres psql -U postgres -d billor < backup.sql
 ```
 
 ## Health Checks

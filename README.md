@@ -16,7 +16,7 @@ For a completely fresh installation from a clean clone:
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd bilor
+cd billor
 
 # Bootstrap the entire application (database + services)
 npm run bootstrap
