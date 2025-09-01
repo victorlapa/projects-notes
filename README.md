@@ -9,55 +9,37 @@ A full-stack application for managing projects and notes with server-driven beha
 - **Database**: PostgreSQL + TypeORM
 - **Containerization**: Docker + Docker Compose
 
-## 🚀 First Time Setup (Fresh Clone)
-
-For a completely fresh installation from a clean clone:
+## Getting Started
 
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd billor
 
-# Bootstrap the entire application (database + services)
+# Install dependencies
+npm install - frontend backend database
+
+# Set up environment variables
+# Copy .env.example to .env in root folder and configure as needed
+
+# Bootstrap and run Docker containers
 npm run bootstrap
+
+# Run Docker instances
+# This will start all required services
 ```
 
-This single command will:
-- Remove any existing containers and volumes
-- Build all Docker images from scratch
-- Start PostgreSQL database with fresh schema
-- Seed database with sample data (2 users, 2 projects, 5 notes)
-- Start backend API server
-- Start frontend React application
+## Access URLs
 
-**Access the application**:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:3001
-- API Documentation: http://localhost:3001/api
+- **Swagger API Documentation**: http://localhost:3001/api#/
+- **Frontend Application**: http://localhost:3002/
 
-## Quick Start (Subsequent Runs)
-
-After initial setup, use these commands:
-
-```bash
-# Start all services
-npm run dev
-
-# Stop all services
-npm run stop
-
-# Clean everything (remove containers and volumes)
-npm run clean
-```
-
-## Environment Setup (Optional)
+## Environment Setup
 
 The application works with default settings, but you can customize:
 
 ```bash
 cp .env.example .env
-cp frontend/.env.example frontend/.env
-# Edit the .env files as needed
+# Edit the .env file as needed
 ```
 
 ## Local Development

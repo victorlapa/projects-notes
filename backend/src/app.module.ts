@@ -16,7 +16,7 @@ import { SeedService } from './seed.service';
       port: parseInt(process.env.DATABASE_PORT || '5432'),
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'root',
-      database: process.env.DATABASE_NAME || 'project-notes',
+      database: process.env.DATABASE_NAME || 'billor',
       entities: [Project, Note, User],
       synchronize: true,
       logging: true,
