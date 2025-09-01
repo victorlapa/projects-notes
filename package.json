@@ -1,0 +1,12 @@
+{
+  "name": "bilor",
+  "version": "1.0.0",
+  "description": "Projects & Notes app with server-driven behaviors",
+  "scripts": {
+    "bootstrap": "docker compose down -v && docker compose up --build",
+    "dev": "docker compose up --build",
+    "stop": "docker compose down",
+    "clean": "docker compose down -v && docker system prune -f"
+  },
+  "private": true
+}

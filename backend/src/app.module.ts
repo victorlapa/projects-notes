@@ -6,23 +6,26 @@ import { UsersModule } from './users/users.module';
 import { Project } from './entities/project.entity';
 import { Note } from './entities/note.entity';
 import { User } from './entities/user.entity';
+import { SeedService } from './seed.service';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'root',
-      database: 'project-notes',
+      host: process.env.DATABASE_HOST || 'localhost',
+      port: parseInt(process.env.DATABASE_PORT) || 5432,
+      username: process.env.DATABASE_USER || 'postgres',
+      password: process.env.DATABASE_PASSWORD || 'postgres',
+      database: process.env.DATABASE_NAME || 'bilor',
       entities: [Project, Note, User],
       synchronize: true,
-      logging: false,
+      logging: true,
     }),
+    TypeOrmModule.forFeature([Project, Note, User]),
     ProjectsModule,
     NotesModule,
     UsersModule,
   ],
+  providers: [SeedService],
 })
 export class AppModule {}

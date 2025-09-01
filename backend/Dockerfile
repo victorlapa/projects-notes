@@ -1,27 +1,30 @@
-# Use Node.js 18 Alpine for smaller image size
-FROM node:18-alpine
+FROM node:18-alpine AS base
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
+FROM base AS deps
 COPY package*.json ./
-
-# Install dependencies
 RUN npm ci --only=production
 
-# Copy source code
+FROM base AS build
+COPY package*.json ./
+RUN npm ci
 COPY . .
-
-# Build the application
 RUN npm run build
 
-# Expose the port
+FROM base AS production
+RUN addgroup --system --gid 1001 nestjs
+RUN adduser --system --uid 1001 nestjs
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package.json ./package.json
+
+USER nestjs
+
 EXPOSE 3001
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3001/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
 
-# Start the application
 CMD ["npm", "run", "start:prod"]
