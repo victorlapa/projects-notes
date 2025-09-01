@@ -25,7 +25,7 @@ npm install - frontend backend database
 npm run bootstrap
 
 # Run Docker instances
-docker-compose up postgres -d
+docker compose up -d --build
 # This will start all required services
 ```
 
